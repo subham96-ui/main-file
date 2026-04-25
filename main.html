@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediLine AI - Advanced Healthcare</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { font-family: 'Inter', sans-serif; }
+body { background: #0a0e27; color: #fff; overflow-x: hidden; min-height: 100vh; }
+
+.bg-animation {
+    position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
+    overflow: hidden;
+}
+.bg-animation::before {
+    content:''; position:absolute; width:200%; height:200%; top:-50%; left:-50%;
+    background: radial-gradient(circle at 20% 30%, rgba(59,130,246,0.3) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(139,92,246,0.3) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(236,72,153,0.2) 0%, transparent 50%);
+    animation: rotate 20s linear infinite;
+}
+@keyframes rotate { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+
+.particle { position:absolute; border-radius:50%; background:rgba(59,130,246,0.5); pointer-events:none; animation:float 15s infinite ease-in-out; }
+@keyframes float {
+    0%,100%{transform:translate(0,0) scale(1);opacity:0.3}
+    25%{transform:translate(100px,-100px) scale(1.2);opacity:0.8}
+    50%{transform:translate(-80px,80px) scale(0.8);opacity:0.5}
+    75%{transform:translate(80px,100px) scale(1.1);opacity:0.7}
+}
+.dna-line { position:absolute; width:2px; background:linear-gradient(180deg,transparent,rgba(59,130,246,0.6),transparent); animation:pulse-line 3s infinite ease-in-out; }
+@keyframes pulse-line { 0%,100%{opacity:0.3;height:100px} 50%{opacity:1;height:200px} }
+
+.glass {
+    background:rgba(255,255,255,0.05); backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.1);
+    border-radius:20px; box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* ── LOGIN ── */
+.login-page {
+    min-height:100vh; display:flex; align-items:center;
+    justify-content:center; padding:20px; position:relative; z-index:1;
+}
+.login-box { max-width:440px; width:100%; padding:40px; animation:fadeUp 0.8s ease; }
+@keyframes fadeUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.logo {
+    background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text; font-weight:800; font-size:1.8rem; letter-spacing:-0.5px;
+}
+.tab-toggle { display:flex; background:rgba(255,255,255,0.05); border-radius:12px; padding:4px; margin-bottom:24px; }
+.tab-toggle button {
+    flex:1; padding:10px; border-radius:8px; color:#94a3b8;
+    font-weight:500; border:none; background:transparent; cursor:pointer; transition:all 0.3s;
+}
+.tab-toggle button.active { background:linear-gradient(135deg,#3b82f6,#8b5cf6); color:white; }
+
+.inp-wrap { position:relative; margin-bottom:14px; }
+.inp-wrap i { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#64748b; pointer-events:none; }
+.inp-wrap .toggle-pass { left:auto; right:16px; cursor:pointer; pointer-events:all; }
+
+.login-input {
+    width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    color:white; padding:14px 16px 14px 44px; border-radius:12px; outline:none; transition:all 0.3s;
+}
+.login-input:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.2); }
+.login-input::placeholder { color:#64748b; }
+
+.login-btn {
+    width:100%; background:linear-gradient(135deg,#3b82f6,#8b5cf6);
+    color:white; padding:14px; border-radius:12px; font-weight:600;
+    border:none; cursor:pointer; transition:all 0.3s; margin-top:4px;
+}
+.login-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(59,130,246,0.4); }
+.err-msg { color:#f87171; font-size:0.83rem; margin-bottom:8px; padding:8px 12px; background:rgba(239,68,68,0.1); border-radius:8px; border:1px solid rgba(239,68,68,0.2); }
+
+/* ── APP SHELL ── */
+.app-wrap { max-width:1400px; margin:auto; display:flex; min-height:100vh; padding:20px; gap:20px; position:relative; z-index:1; }
+
+/* ── SIDEBAR ── */
+.sidebar { width:260px; padding:25px; height:fit-content; position:sticky; top:20px; animation:slideIn 0.6s ease; flex-shrink:0; }
+@keyframes slideIn { from{transform:translateX(-50px);opacity:0} to{transform:translateX(0);opacity:1} }
+
+.nav-btn {
+    width:100%; padding:12px 16px; border-radius:12px; text-align:left;
+    transition:all 0.3s ease; color:#cbd5e1; font-weight:500;
+    display:flex; align-items:center; gap:12px; margin-bottom:8px;
+    cursor:pointer; border:1px solid transparent; background:transparent;
+}
+.nav-btn:hover,.nav-btn.active {
+    background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(139,92,246,0.2));
+    color:white; border-color:rgba(59,130,246,0.3); transform:translateX(4px);
+}
+.profile-card {
+    padding:14px; background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.15));
+    border:1px solid rgba(59,130,246,0.2); border-radius:14px; margin-top:16px; cursor:pointer; transition:all 0.3s;
+}
+.profile-card:hover { transform:translateY(-2px); border-color:rgba(59,130,246,0.5); }
+.profile-avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#ec4899,#8b5cf6); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; }
+
+/* ── MAIN ── */
+.main { flex:1; padding:30px; animation:fadeUp 0.8s ease; min-width:0; }
+.page-title { font-size:2rem; font-weight:700; margin-bottom:8px; background:linear-gradient(135deg,#fff,#94a3b8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.page-subtitle { color:#94a3b8; margin-bottom:24px; }
+
+/* ── VIDEO CALL ── */
+.video-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-bottom:18px; }
+.video-card { position:relative; border-radius:24px; overflow:hidden; background:rgba(255,255,255,0.05); border:1px solid rgba(59,130,246,0.18); box-shadow:0 18px 40px rgba(15,23,42,0.35); }
+.video-card video { width:100%; min-height:260px; object-fit:cover; background:#020617; }
+.video-label { position:absolute; left:16px; top:16px; z-index:2; padding:6px 12px; border-radius:999px; background:rgba(15,23,42,0.85); color:#e0f2fe; font-size:0.82rem; letter-spacing:0.02em; }
+.subtext { margin-top:14px; color:#94a3b8; font-size:0.95rem; }
+
+/* ── DOCTOR CARDS ── */
+.doctor-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+.doctor-card {
+    background:rgba(255,255,255,0.05); backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:16px;
+    cursor:pointer; transition:all 0.4s cubic-bezier(0.4,0,0.2,1); position:relative; overflow:hidden;
+}
+.doctor-card::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(59,130,246,0.1),transparent); transition:left 0.6s; }
+.doctor-card:hover::before { left:100%; }
+.doctor-card:hover { transform:translateY(-6px); border-color:rgba(59,130,246,0.5); box-shadow:0 12px 40px rgba(59,130,246,0.2); }
+
+.doc-avatar { width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#8b5cf6); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.2rem; flex-shrink:0; }
+.badge { display:inline-block; padding:4px 10px; background:rgba(59,130,246,0.2); color:#60a5fa; border-radius:20px; font-size:0.75rem; font-weight:500; margin-top:8px; }
+
+/* ── CATEGORIES ── */
+.cat-pills { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; }
+.cat-pill {
+    padding:8px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+    border-radius:20px; cursor:pointer; font-size:0.85rem; transition:all 0.3s; color:#cbd5e1;
+}
+.cat-pill:hover,.cat-pill.active { background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-color:transparent; color:white; transform:translateY(-2px); }
+
+/* ── APPOINTMENTS ── */
+.appt-card {
+    padding:20px; border-radius:16px; background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1); margin-bottom:12px; transition:all 0.3s;
+    display:flex; align-items:center; gap:16px;
+}
+.appt-card:hover { border-color:rgba(59,130,246,0.4); transform:translateX(4px); }
+.status-badge { padding:4px 10px; background:rgba(16,185,129,0.2); color:#34d399; border-radius:20px; font-size:0.75rem; font-weight:600; white-space:nowrap; }
+.empty-state { text-align:center; padding:60px 20px; color:#64748b; }
+.empty-state i { font-size:4rem; margin-bottom:16px; opacity:0.3; display:block; }
+
+/* ── CHAT ── */
+.chat-container { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:20px; overflow:hidden; }
+.chat-header { padding:16px 20px; background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(139,92,246,0.2)); border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:12px; }
+.ai-avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#8b5cf6); display:flex; align-items:center; justify-content:center; position:relative; }
+.ai-avatar::after { content:''; position:absolute; width:10px; height:10px; background:#10b981; border:2px solid #0a0e27; border-radius:50%; bottom:0; right:0; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.2);opacity:0.8} }
+
+.chat-box { height:55vh; overflow-y:auto; padding:20px; scroll-behavior:smooth; }
+.chat-box::-webkit-scrollbar { width:6px; }
+.chat-box::-webkit-scrollbar-thumb { background:rgba(59,130,246,0.5); border-radius:3px; }
+
+.msg-wrapper { margin-bottom:16px; animation:msgSlide 0.4s ease; }
+@keyframes msgSlide { from{transform:translateY(10px);opacity:0} to{transform:translateY(0);opacity:1} }
+.msg { padding:12px 16px; border-radius:16px; display:inline-block; max-width:80%; line-height:1.6; word-wrap:break-word; }
+.user-msg { background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; border-bottom-right-radius:4px; }
+.ai-msg { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); color:#e2e8f0; border-bottom-left-radius:4px; }
+
+.typing { display:inline-flex; gap:4px; padding:14px 16px; background:rgba(255,255,255,0.08); border-radius:16px; }
+.typing span { width:8px; height:8px; background:#60a5fa; border-radius:50%; animation:bounce 1.4s infinite ease-in-out; }
+.typing span:nth-child(2){animation-delay:0.2s} .typing span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:0.5} 30%{transform:translateY(-8px);opacity:1} }
+
+.chat-input-area { padding:16px 20px; background:rgba(0,0,0,0.2); border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:10px; }
+.chat-input { flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; padding:12px 16px; border-radius:12px; outline:none; transition:all 0.3s; }
+.chat-input:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.2); }
+.chat-input::placeholder { color:#64748b; }
+.send-btn { background:linear-gradient(135deg,#3b82f6,#8b5cf6); color:white; padding:12px 20px; border-radius:12px; font-weight:600; transition:all 0.3s; border:none; cursor:pointer; }
+.send-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(59,130,246,0.4); }
+
+button.video-call-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 14px;
+    padding: 10px 14px;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    background: rgba(56, 189, 248, 0.12);
+    color: #eff6ff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+button.video-call-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(56, 189, 248, 0.22);
+    border-color: rgba(56, 189, 248, 0.55);
+}
+
+.analysis-card { background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(139,92,246,0.1)); border:1px solid rgba(59,130,246,0.3); padding:16px; border-radius:12px; margin-top:10px; }
+.severity-bar { height:6px; border-radius:3px; background:rgba(255,255,255,0.1); overflow:hidden; margin:8px 0; }
+.severity-fill { height:100%; border-radius:3px; animation:fillBar 1.2s ease forwards; }
+@keyframes fillBar { from{width:0} }
+.routing-info { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); padding:12px; border-radius:10px; margin-top:8px; }
+
+.rec-doc-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:14px; border-radius:12px; margin-top:8px; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; gap:12px; }
+.rec-doc-card:hover { background:rgba(59,130,246,0.15); transform:translateX(4px); border-color:rgba(59,130,246,0.5); }
+
+/* ── MODAL ── */
+.modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); display:none; align-items:center; justify-content:center; z-index:200; }
+.modal-overlay.open { display:flex; }
+.modal { background:linear-gradient(135deg,#1a1f4e,#0a0e27); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:30px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; animation:modalPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes modalPop { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+
+.time-slot { padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; text-align:center; cursor:pointer; transition:all 0.3s; font-size:0.9rem; }
+.time-slot:hover,.time-slot.selected { background:linear-gradient(135deg,#3b82f6,#8b5cf6); border-color:transparent; }
+
+.confirm-btn { width:100%; background:linear-gradient(135deg,#10b981,#059669); color:white; padding:14px; border-radius:12px; font-weight:600; margin-top:16px; transition:all 0.3s; border:none; cursor:pointer; }
+.confirm-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(16,185,129,0.4); }
+.success-check { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,#10b981,#059669); margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; animation:successPop 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes successPop { 0%{transform:scale(0) rotate(-180deg)} 100%{transform:scale(1) rotate(0)} }
+
+.big-avatar { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,#ec4899,#8b5cf6); margin:0 auto 16px; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:700; }
+.profile-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.logout-btn { width:100%; background:linear-gradient(135deg,#ef4444,#dc2626); color:white; padding:12px; border-radius:12px; font-weight:600; border:none; cursor:pointer; margin-top:16px; transition:all 0.3s; }
+.logout-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(239,68,68,0.4); }
+
+@media(max-width:768px){ .sidebar{display:none} .app-wrap{padding:10px} .video-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-animation">
+    <div class="particle" style="width:80px;height:80px;top:10%;left:10%;"></div>
+    <div class="particle" style="width:120px;height:120px;top:60%;left:80%;background:rgba(139,92,246,0.4);animation-delay:3s;"></div>
+    <div class="particle" style="width:60px;height:60px;top:30%;left:70%;background:rgba(236,72,153,0.4);animation-delay:6s;"></div>
+    <div class="particle" style="width:100px;height:100px;top:80%;left:20%;animation-delay:9s;"></div>
+    <div class="particle" style="width:70px;height:70px;top:50%;left:50%;background:rgba(16,185,129,0.3);animation-delay:12s;"></div>
+    <div class="dna-line" style="left:15%;top:20%;"></div>
+    <div class="dna-line" style="left:85%;top:40%;animation-delay:1s;"></div>
+    <div class="dna-line" style="left:45%;top:70%;animation-delay:2s;"></div>
+</div>
+
+<!-- ═══════════════ LOGIN PAGE ═══════════════ -->
+<div id="login-page" class="login-page">
+    <div class="login-box glass">
+        <div class="text-center mb-6">
+            <div class="logo mb-1"><i class="fas fa-heartbeat"></i> MediLine</div>
+            <p class="text-slate-400 text-sm">Your Advanced Healthcare Companion</p>
+        </div>
+
+        <div class="tab-toggle">
+            <button id="tab-login" class="active" onclick="switchTab('login')">Login</button>
+            <button id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+        </div>
+
+        <div id="signup-name-wrap" class="inp-wrap" style="display:none;">
+            <i class="fas fa-user"></i>
+            <input id="reg-name" class="login-input" type="text" placeholder="Full Name">
+        </div>
+
+        <div class="inp-wrap">
+            <i class="fas fa-envelope"></i>
+            <input id="reg-email" class="login-input" type="text" placeholder="Email or Phone Number">
+        </div>
+
+        <div class="inp-wrap">
+            <i class="fas fa-lock"></i>
+            <input id="reg-pass" class="login-input" type="password" placeholder="Password">
+            <i class="fas fa-eye toggle-pass" onclick="togglePass()"></i>
+        </div>
+
+        <div id="auth-error" style="display:none;" class="err-msg"></div>
+
+        <button class="login-btn" onclick="handleAuth()">
+            <i class="fas fa-sign-in-alt mr-2" id="auth-icon"></i>
+            <span id="auth-btn-label">Login</span>
+        </button>
+
+        <p class="text-center text-xs text-slate-500 mt-4">
+            <i class="fas fa-shield-alt mr-1"></i> Secure authentication · Demo: any email + any password
+        </p>
+    </div>
+</div>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<div id="app" style="display:none;">
+<div class="app-wrap">
+
+    <!-- Sidebar -->
+    <div class="sidebar glass">
+        <div class="logo mb-8"><i class="fas fa-heartbeat"></i> MediLine</div>
+
+        <nav>
+            <button class="nav-btn active" id="nb-home"        onclick="nav('home')">        <i class="fas fa-home"></i>           Home</button>
+            <button class="nav-btn"        id="nb-ai"          onclick="nav('ai')">           <i class="fas fa-robot"></i>          AI Health Check</button>
+            <button class="nav-btn"        id="nb-appointments"onclick="nav('appointments')"> <i class="fas fa-calendar-check"></i> Appointments</button>
+            <button class="nav-btn"        id="nb-doctors"     onclick="nav('doctors')">      <i class="fas fa-user-md"></i>        Doctors</button>
+            <button class="nav-btn"        id="nb-video"       onclick="nav('video')">        <i class="fas fa-video"></i>         Video Call</button>
+        </nav>
+
+        <div class="profile-card" onclick="openModal('profile-modal')">
+            <div class="flex items-center gap-3">
+                <div class="profile-avatar" id="sb-avatar">?</div>
+                <div style="flex:1;min-width:0;">
+                    <div class="font-semibold text-sm truncate" id="sb-name">—</div>
+                    <div class="text-xs text-slate-400 truncate" id="sb-email">—</div>
+                </div>
+                <i class="fas fa-chevron-right text-slate-500 text-xs"></i>
+            </div>
+        </div>
+
+        <div class="glass p-4 mt-4" style="background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.15));">
+            <div class="text-xs text-slate-400 mb-1">AI Assistant</div>
+            <div class="text-sm font-semibold">24/7 Available</div>
+            <div class="flex items-center gap-1 mt-2 text-xs text-green-400">
+                <span style="width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block;"></span> Online
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="main glass">
+
+        <!-- HOME -->
+        <div id="pg-home">
+            <h2 class="page-title">Welcome Back, <span id="home-name">Friend</span>! 👋</h2>
+            <p class="page-subtitle">Top rated specialists ready to help you today</p>
+            <div id="home-doctor-list" class="doctor-grid"></div>
+        </div>
+
+        <!-- AI CHAT -->
+        <div id="pg-ai" style="display:none;">
+            <h2 class="page-title">AI Symptom Analyzer</h2>
+            <p class="page-subtitle">Conversational medical AI · Smart routing to best doctors</p>
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="ai-avatar"><i class="fas fa-robot text-white text-sm"></i></div>
+                    <div>
+                        <div class="font-semibold">MediBot AI</div>
+                        <div class="text-xs text-slate-400">Advanced Medical Assistant</div>
+                    </div>
+                    <div class="ml-auto">
+                        <button onclick="resetChat()" class="text-xs text-slate-400 hover:text-white transition-colors">
+                            <i class="fas fa-redo mr-1"></i>Reset
+                        </button>
+                    </div>
+                </div>
+                <div id="chat-box" class="chat-box"></div>
+                <div class="chat-input-area">
+                    <input id="chat-inp" class="chat-input" placeholder="Type your message..." onkeydown="if(event.key==='Enter')sendMsg()">
+                    <button class="send-btn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- APPOINTMENTS -->
+        <div id="pg-appointments" style="display:none;">
+            <h2 class="page-title">My Appointments</h2>
+            <p class="page-subtitle">Your scheduled consultations</p>
+            <div id="appt-list"></div>
+        </div>
+
+        <!-- DOCTORS -->
+        <div id="pg-doctors" style="display:none;">
+            <h2 class="page-title">Find a Specialist</h2>
+            <p class="page-subtitle">Browse by category · <span class="text-blue-400">Click any doctor to book</span></p>
+            <div class="cat-pills" id="cat-pills"></div>
+            <div id="filtered-docs" class="doctor-grid"></div>
+        </div>
+
+        <!-- VIDEO CALL -->
+        <div id="pg-video" style="display:none;">
+            <h2 class="page-title">Video Consultation</h2>
+            <p class="page-subtitle">Start your secure WebRTC session with a doctor.</p>
+            <div class="video-grid">
+                <div class="video-card">
+                    <span class="video-label">You</span>
+                    <video id="localVideo" autoplay muted playsinline></video>
+                </div>
+                <div class="video-card">
+                    <span class="video-label">Doctor</span>
+                    <video id="remoteVideo" autoplay playsinline></video>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-4">
+                <button class="send-btn" onclick="toggleMic()">🎤 Mic</button>
+                <button class="send-btn" onclick="toggleCam()">📷 Cam</button>
+                <button class="logout-btn" onclick="endCall()">End Call</button>
+            </div>
+            <div class="subtext">Local camera preview is active. Remote stream will appear when connected.</div>
+        </div>
+
+    </div>
+</div>
+</div>
+
+<!-- ═══ BOOKING MODAL ═══ -->
+<div id="booking-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('booking-modal')">
+    <div class="modal"><div id="booking-content"></div></div>
+</div>
+
+<!-- ═══ PROFILE MODAL ═══ -->
+<div id="profile-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('profile-modal')">
+    <div class="modal"><div id="profile-content"></div></div>
+</div>
+
+<!-- ═══ CALL MODAL ═══ -->
+<div id="call-modal" class="modal-overlay" onclick="if(event.target===this)closeModal('call-modal')">
+    <div class="modal" style="max-width:900px;">
+        <div class="flex justify-between mb-3">
+            <div>
+                <h3 class="text-lg font-bold">Video Consultation</h3>
+                <p class="subtext">Instant doctor call with live webcam preview.</p>
+            </div>
+            <button class="close-btn" onclick="endCall(); closeModal('call-modal')">✕</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="video-card">
+                <span class="video-label">You</span>
+                <video id="modalLocalVideo" autoplay muted playsinline class="rounded-xl bg-black"></video>
+            </div>
+            <div class="video-card">
+                <span class="video-label">Doctor</span>
+                <video id="modalRemoteVideo" autoplay playsinline class="rounded-xl bg-black"></video>
+            </div>
+        </div>
+        <div id="call-doctor-label" class="subtext mb-4">Connecting to doctor...</div>
+        <div class="flex gap-2">
+            <button class="send-btn" onclick="toggleMic()">🎤 Mic</button>
+            <button class="send-btn" onclick="toggleCam()">📷 Cam</button>
+            <button class="logout-btn" onclick="endCall(); closeModal('call-modal')">End Call</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════════ */
+const DOCTORS = [
+    {id:1, name:"Dr Amit Sharma",  cat:"Heart",   spec:"Cardiologist",      rating:4.9, exp:"15 yrs", fee:"₹800",  hospital:"Apollo Hospital",    dist:"2.3 km"},
+    {id:2, name:"Dr Priya Singh",  cat:"Dental",  spec:"Dentist",           rating:4.7, exp:"10 yrs", fee:"₹500",  hospital:"Smile Care Clinic",  dist:"1.8 km"},
+    {id:3, name:"Dr Rahul Verma",  cat:"General", spec:"General Physician", rating:4.5, exp:"12 yrs", fee:"₹400",  hospital:"City Hospital",       dist:"0.9 km"},
+    {id:4, name:"Dr Sameer Khan",  cat:"Eye",     spec:"Ophthalmologist",   rating:4.8, exp:"14 yrs", fee:"₹600",  hospital:"Vision Plus",         dist:"3.1 km"},
+    {id:5, name:"Dr Sunita Rao",   cat:"Brain",   spec:"Neurologist",       rating:4.9, exp:"18 yrs", fee:"₹1000", hospital:"NeuroCare",           dist:"4.2 km"},
+    {id:6, name:"Dr Kavya Mehta",  cat:"Skin",    spec:"Dermatologist",     rating:4.8, exp:"11 yrs", fee:"₹700",  hospital:"SkinGlow Clinic",     dist:"2.7 km"},
+    {id:7, name:"Dr Arjun Patel",  cat:"Bone",    spec:"Orthopedic",        rating:4.7, exp:"13 yrs", fee:"₹750",  hospital:"BoneFit Center",      dist:"3.5 km"},
+    {id:8, name:"Dr Neha Kapoor",  cat:"Stomach", spec:"Gastroenterologist",rating:4.6, exp:"9 yrs",  fee:"₹650",  hospital:"GutCare Hospital",    dist:"2.1 km"},
+    {id:9, name:"Dr Ravi Menon",   cat:"Heart",   spec:"Cardiologist",      rating:4.6, exp:"11 yrs", fee:"₹750",  hospital:"HeartBeat Center",    dist:"3.8 km"},
+    {id:10,name:"Dr Anjali Das",   cat:"Skin",    spec:"Dermatologist",     rating:4.7, exp:"8 yrs",  fee:"₹600",  hospital:"DermaCare Clinic",    dist:"1.5 km"},
+];
+
+const HOSPITALS = [
+    {name:"Apollo Hospital",      dist:"2.5 km", type:"Multi-Specialty",          phone:"033-2320-3040"},
+    {name:"Fortis Hospital",      dist:"3.8 km", type:"Emergency & Critical Care", phone:"033-6628-4444"},
+    {name:"AIIMS Medical Centre", dist:"5.2 km", type:"Advanced Tertiary Care",    phone:"011-2658-8500"},
+];
+
+const CATEGORIES = ["All","Heart","Brain","Dental","Eye","Skin","Bone","Stomach","General"];
+
+/* ════════════════════════════════════════════════
+   AUTH
+════════════════════════════════════════════════ */
+let currentUser = null;
+let isLoginMode = true;
+
+function switchTab(mode) {
+    isLoginMode = (mode === 'login');
+    document.getElementById('tab-login').classList.toggle('active', isLoginMode);
+    document.getElementById('tab-signup').classList.toggle('active', !isLoginMode);
+    document.getElementById('signup-name-wrap').style.display = isLoginMode ? 'none' : 'block';
+    document.getElementById('auth-btn-label').textContent = isLoginMode ? 'Login' : 'Create Account';
+    document.getElementById('auth-icon').className = isLoginMode ? 'fas fa-sign-in-alt mr-2' : 'fas fa-user-plus mr-2';
+    document.getElementById('auth-error').style.display = 'none';
+}
+
+function togglePass() {
+    const p = document.getElementById('reg-pass');
+    p.type = p.type === 'password' ? 'text' : 'password';
+}
+
+function showError(msg) {
+    const el = document.getElementById('auth-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+function handleAuth() {
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-pass').value.trim();
+    const name     = document.getElementById('reg-name').value.trim();
+    document.getElementById('auth-error').style.display = 'none';
+
+    if (!email) { showError('Please enter your email or phone.'); return; }
+    if (!password) { showError('Please enter a password.'); return; }
+    if (password.length < 4) { showError('Password must be at least 4 characters.'); return; }
+
+    // Load stored users
+    let users = {};
+    try { users = JSON.parse(localStorage.getItem('ml_users') || '{}'); } catch(e) { users = {}; }
+
+    if (!isLoginMode) {
+        // SIGN UP
+        if (!name) { showError('Please enter your full name.'); return; }
+        if (users[email]) { showError('Account already exists. Please login.'); return; }
+        users[email] = { name, email, password, joined: new Date().toISOString() };
+        localStorage.setItem('ml_users', JSON.stringify(users));
+        currentUser = users[email];
+    } else {
+        // LOGIN — if user doesn't exist yet, auto-create (demo convenience)
+        if (!users[email]) {
+            // Auto-register for demo
+            const autoName = email.split('@')[0].replace(/[^a-zA-Z]/g,' ').trim() || 'User';
+            users[email] = { name: autoName, email, password, joined: new Date().toISOString() };
+            localStorage.setItem('ml_users', JSON.stringify(users));
+        }
+        if (users[email].password !== password) {
+            showError('Incorrect password. Please try again.'); return;
+        }
+        currentUser = users[email];
+    }
+
+    localStorage.setItem('ml_session', JSON.stringify(currentUser));
+    bootApp();
+}
+
+function bootApp() {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+
+    const name    = currentUser.name || 'User';
+    const initial = name.charAt(0).toUpperCase();
+    document.getElementById('sb-avatar').textContent    = initial;
+    document.getElementById('sb-name').textContent      = name;
+    document.getElementById('sb-email').textContent     = currentUser.email;
+    document.getElementById('home-name').textContent    = name.split(' ')[0];
+
+    renderHomeDoctors();
+    buildCatPills();
+    nav('home');
+}
+
+function logout() {
+    localStorage.removeItem('ml_session');
+    currentUser = null;
+    closeModal('profile-modal');
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-page').style.display = 'flex';
+    // Reset fields
+    ['reg-email','reg-pass','reg-name'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('chat-box').innerHTML = '';
+    chatState = { stage:'idle', collected:{} };
+    switchTab('login');
+}
+
+// Auto-restore session
+(function() {
+    try {
+        const s = localStorage.getItem('ml_session');
+        if (s) { currentUser = JSON.parse(s); bootApp(); }
+    } catch(e) {}
+})();
+
+/* ════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════ */
+const PAGES   = ['home','ai','appointments','doctors','video'];
+const NAV_IDS = ['nb-home','nb-ai','nb-appointments','nb-doctors','nb-video'];
+
+function nav(page) {
+    PAGES.forEach((p,i) => {
+        document.getElementById('pg-' + p).style.display    = p === page ? 'block' : 'none';
+        document.getElementById(NAV_IDS[i]).classList.toggle('active', p === page);
+    });
+    if (page === 'appointments') renderAppointments();
+    if (page === 'doctors')      renderFilteredDocs('All');
+    if (page === 'ai' && document.getElementById('chat-box').innerHTML === '') initChat();
+    if (page === 'video')        startVideoCall();
+}
+
+/* ════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════ */
+function initials(name) {
+    return name.replace('Dr ','').split(' ').map(n => n[0]).join('').toUpperCase();
+}
+
+function doctorCard(d, smallAvatar) {
+    const sz = smallAvatar ? 'width:44px;height:44px;font-size:0.9rem;' : '';
+    return `
+    <div class="doctor-card" onclick="openBooking(${d.id})">
+        <div class="flex items-center justify-between gap-2 mb-3">
+            <button class="video-call-btn" onclick="openCallModal(event, ${d.id})">
+                <i class="fas fa-video"></i> Video Call
+            </button>
+        </div>
+        <div class="flex items-center gap-3 mb-3">
+            <div class="doc-avatar" style="${sz}">${initials(d.name)}</div>
+            <div>
+                <div class="font-semibold">${d.name}</div>
+                <div class="text-sm text-slate-400">${d.spec}</div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 text-sm text-slate-300 flex-wrap">
+            <span><i class="fas fa-star text-yellow-400"></i> ${d.rating}</span>
+            <span><i class="fas fa-briefcase text-blue-400"></i> ${d.exp}</span>
+            <span><i class="fas fa-map-marker-alt text-pink-400"></i> ${d.dist}</span>
+        </div>
+        <div class="flex items-center justify-between mt-3">
+            <span class="badge">${d.cat}</span>
+            <span class="text-sm font-semibold text-green-400">${d.fee}</span>
+        </div>
+        <div class="text-xs text-slate-500 mt-2"><i class="fas fa-hospital"></i> ${d.hospital}</div>
+    </div>`;
+}
+
+function renderHomeDoctors() {
+    document.getElementById('home-doctor-list').innerHTML = DOCTORS.map(d => doctorCard(d)).join('');
+}
+
+/* ════════════════════════════════════════════════
+   DOCTORS PAGE
+════════════════════════════════════════════════ */
+function buildCatPills() {
+    document.getElementById('cat-pills').innerHTML = CATEGORIES.map(c => `
+        <div class="cat-pill ${c==='All'?'active':''}" onclick="filterCat(this,'${c}')">
+            ${catIcon(c)} ${c}
+        </div>`).join('');
+    renderFilteredDocs('All');
+}
+
+function catIcon(c) {
+    const icons = {All:'🏥',Heart:'❤️',Brain:'🧠',Dental:'🦷',Eye:'👁️',Skin:'🌿',Bone:'🦴',Stomach:'🫁',General:'💊'};
+    return icons[c] || '🏥';
+}
+
+function filterCat(el, cat) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    renderFilteredDocs(cat);
+}
+
+function renderFilteredDocs(cat) {
+    const list = cat === 'All' ? DOCTORS : DOCTORS.filter(d => d.cat === cat);
+    document.getElementById('filtered-docs').innerHTML = list.length
+        ? list.map(d => doctorCard(d)).join('')
+        : `<div class="text-slate-400 col-span-full text-center py-10">No doctors found in this category.</div>`;
+}
+
+/* ════════════════════════════════════════════════
+   APPOINTMENTS
+════════════════════════════════════════════════ */
+function getAppointments() {
+    try {
+        const all = JSON.parse(localStorage.getItem('ml_appts') || '{}');
+        return all[currentUser.email] || [];
+    } catch(e) { return []; }
+}
+
+function saveAppointment(appt) {
+    const all = JSON.parse(localStorage.getItem('ml_appts') || '{}');
+    if (!all[currentUser.email]) all[currentUser.email] = [];
+    all[currentUser.email].push(appt);
+    localStorage.setItem('ml_appts', JSON.stringify(all));
+}
+
+function renderAppointments() {
+    const list = getAppointments();
+    const el   = document.getElementById('appt-list');
+    if (!list.length) {
+        el.innerHTML = `<div class="empty-state"><i class="fas fa-calendar-times"></i><div class="text-lg font-semibold mb-2">No appointments yet</div><p class="text-sm">Use AI Chat or browse Doctors to book your first appointment.</p></div>`;
+        return;
+    }
+    el.innerHTML = list.slice().reverse().map(a => `
+        <div class="appt-card">
+            <div class="doc-avatar" style="width:50px;height:50px;font-size:1rem;flex-shrink:0;">${initials(a.doctor)}</div>
+            <div style="flex:1;min-width:0;">
+                <div class="font-semibold">${a.doctor}</div>
+                <div class="text-sm text-slate-400">${a.specialty} · ${a.hospital}</div>
+                <div class="text-xs text-slate-500 mt-1"><i class="fas fa-calendar mr-1"></i>${a.date} &nbsp; <i class="fas fa-clock mr-1"></i>${a.time}</div>
+                <div class="text-xs text-slate-500 mt-1"><i class="fas fa-tag mr-1"></i>ID: ${a.id}</div>
+            </div>
+            <div class="text-right flex-shrink-0">
+                <div class="status-badge">Confirmed ✓</div>
+                <div class="text-sm font-semibold text-green-400 mt-2">${a.fee}</div>
+            </div>
+        </div>`).join('');
+}
+
+let localStream = null;
+let isMicOn = true;
+let isCamOn = true;
+
+function startVideoCall(useModal = false) {
+    const localVideo = document.getElementById(useModal ? 'modalLocalVideo' : 'localVideo');
+    const remoteVideo = document.getElementById(useModal ? 'modalRemoteVideo' : 'remoteVideo');
+    if (localStream) {
+        if (localVideo) localVideo.srcObject = localStream;
+        if (remoteVideo) remoteVideo.srcObject = localStream;
+        return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera access is not supported in this browser.');
+        return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+            localStream = stream;
+            if (localVideo) localVideo.srcObject = stream;
+            if (remoteVideo) remoteVideo.srcObject = stream;
+            isMicOn = true;
+            isCamOn = true;
+        })
+        .catch(err => {
+            alert('Unable to access camera/mic: ' + err.message);
+        });
+}
+
+function openCallModal(evt, id) {
+    evt.stopPropagation();
+    const doctor = DOCTORS.find(d => d.id === id);
+    if (!doctor) return;
+    document.getElementById('call-doctor-label').textContent = `Connecting with ${doctor.name}...`;
+    openModal('call-modal');
+    startVideoCall(true);
+}
+
+function toggleMic() {
+    if (!localStream) return;
+    isMicOn = !isMicOn;
+    localStream.getAudioTracks().forEach(track => track.enabled = isMicOn);
+}
+
+function toggleCam() {
+    if (!localStream) return;
+    isCamOn = !isCamOn;
+    localStream.getVideoTracks().forEach(track => track.enabled = isCamOn);
+}
+
+function endCall() {
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+    }
+    ['localVideo','remoteVideo'].forEach(id => {
+        const video = document.getElementById(id);
+        if (video) video.srcObject = null;
+    });
+    nav('home');
+}
+
+/* ════════════════════════════════════════════════
+   BOOKING MODAL
+════════════════════════════════════════════════ */
+let bookingDoctor = null;
+let selectedSlot  = null;
+let selectedDate  = null;
+
+function openBooking(id) {
+    bookingDoctor = DOCTORS.find(d => d.id === id);
+    selectedSlot  = null;
+    selectedDate  = null;
+    renderBooking();
+    openModal('booking-modal');
+}
+
+function renderBooking() {
+    const d     = bookingDoctor;
+    const today = new Date();
+    const dates = [];
+    for (let i = 0; i < 5; i++) {
+        const dt = new Date(today);
+        dt.setDate(dt.getDate() + i);
+        dates.push({
+            label: dt.toLocaleDateString('en-US',{weekday:'short'}),
+            num:   dt.getDate(),
+            month: dt.toLocaleDateString('en-US',{month:'short'}),
+            full:  dt.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
+        });
+    }
+    const slots = ['09:00 AM','10:30 AM','12:00 PM','02:00 PM','04:30 PM','06:00 PM'];
+
+    document.getElementById('booking-content').innerHTML = `
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-xl font-bold">Book Appointment</h3>
+            <button onclick="closeModal('booking-modal')" class="text-slate-400 hover:text-white text-xl transition-colors"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="flex items-center gap-3 p-4 rounded-xl mb-5" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);">
+            <div class="doc-avatar">${initials(d.name)}</div>
+            <div>
+                <div class="font-semibold">${d.name}</div>
+                <div class="text-sm text-slate-400">${d.spec}</div>
+                <div class="text-xs text-slate-500 mt-1"><i class="fas fa-hospital mr-1"></i>${d.hospital} · <i class="fas fa-map-marker-alt mr-1"></i>${d.dist}</div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <div class="text-sm font-semibold mb-3">📅 Select Date</div>
+            <div class="grid grid-cols-5 gap-2">
+                ${dates.map((dt,i) => `
+                    <div class="time-slot${i===0?' selected':''}" onclick="pickDate(this,'${dt.full}')">
+                        <div class="text-xs text-slate-400">${dt.label}</div>
+                        <div class="font-bold">${dt.num}</div>
+                        <div class="text-xs text-slate-400">${dt.month}</div>
+                    </div>`).join('')}
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <div class="text-sm font-semibold mb-3">⏰ Select Time</div>
+            <div class="grid grid-cols-3 gap-2">
+                ${slots.map(s => `<div class="time-slot" onclick="pickSlot(this,'${s}')">${s}</div>`).join('')}
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between p-3 rounded-xl mb-1" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">
+            <span class="text-sm text-slate-300">Consultation Fee</span>
+            <span class="font-bold text-green-400">${d.fee}</span>
+        </div>
+
+        <button class="confirm-btn" onclick="confirmBooking()">
+            <i class="fas fa-check-circle mr-2"></i> Confirm Booking
+        </button>`;
+
+    // Set first date as default
+    selectedDate = dates[0].full;
+}
+
+function pickDate(el, val) {
+    el.closest('.grid').querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedDate = val;
+}
+
+function pickSlot(el, val) {
+    el.closest('.grid').querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSlot = val;
+}
+
+function confirmBooking() {
+    if (!selectedSlot) {
+        alert('Please select a time slot.'); return;
+    }
+    const appt = {
+        id:       'MED' + Date.now().toString().slice(-6),
+        doctor:   bookingDoctor.name,
+        specialty:bookingDoctor.spec,
+        hospital: bookingDoctor.hospital,
+        date:     selectedDate,
+        time:     selectedSlot,
+        fee:      bookingDoctor.fee,
+        bookedAt: new Date().toISOString()
+    };
+    saveAppointment(appt);
+
+    document.getElementById('booking-content').innerHTML = `
+        <div class="text-center py-4">
+            <div class="success-check"><i class="fas fa-check text-white"></i></div>
+            <h3 class="text-2xl font-bold mb-2">Booking Confirmed! 🎉</h3>
+            <p class="text-slate-400 mb-4">Appointment with <b>${bookingDoctor.name}</b> scheduled.</p>
+            <div class="p-4 rounded-xl mb-4" style="background:rgba(255,255,255,0.05);">
+                <div class="text-xs text-slate-400 mb-1">Booking ID</div>
+                <div class="font-mono font-bold text-blue-400 text-lg">${appt.id}</div>
+                <div class="text-xs text-slate-400 mt-2">${appt.date}</div>
+                <div class="text-xs text-slate-400">${appt.time} · ${appt.fee}</div>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">View it under <b>Appointments</b> tab.</p>
+            <button class="confirm-btn" onclick="closeModal('booking-modal')">Done</button>
+        </div>`;
+}
+
+/* ════════════════════════════════════════════════
+   PROFILE MODAL
+════════════════════════════════════════════════ */
+function openProfile() { openModal('profile-modal'); }
+
+function renderProfile() {
+    if (!currentUser) return;
+    const name    = currentUser.name || 'User';
+    const joined  = new Date(currentUser.joined || Date.now()).toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'});
+    const apptCnt = getAppointments().length;
+
+    document.getElementById('profile-content').innerHTML = `
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-xl font-bold">My Profile</h3>
+            <button onclick="closeModal('profile-modal')" class="text-slate-400 hover:text-white text-xl"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="text-center mb-4">
+            <div class="big-avatar">${name.charAt(0).toUpperCase()}</div>
+            <h3 class="text-xl font-bold">${name}</h3>
+            <p class="text-slate-400 text-sm">${currentUser.email}</p>
+        </div>
+        <div>
+            <div class="profile-row"><span class="text-slate-400"><i class="fas fa-envelope mr-2"></i>Email</span><span>${currentUser.email}</span></div>
+            <div class="profile-row"><span class="text-slate-400"><i class="fas fa-calendar mr-2"></i>Joined</span><span>${joined}</span></div>
+            <div class="profile-row"><span class="text-slate-400"><i class="fas fa-calendar-check mr-2"></i>Appointments</span><span>${apptCnt}</span></div>
+            <div class="profile-row" style="border:none;"><span class="text-slate-400"><i class="fas fa-shield-alt mr-2"></i>Status</span><span class="status-badge">Active</span></div>
+        </div>
+        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>`;
+}
+
+/* ════════════════════════════════════════════════
+   MODAL UTILITIES
+════════════════════════════════════════════════ */
+function openModal(id) {
+    if (id === 'profile-modal') renderProfile();
+    document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+}
+
+/* ════════════════════════════════════════════════
+   ADVANCED AI CHATBOT
+════════════════════════════════════════════════ */
+let chatState = {
+    stage: 'idle',          // idle → greeting → name → symptom → duration → severity → analysis
+    collected: {}
+};
+
+function resetChat() {
+    document.getElementById('chat-box').innerHTML = '';
+    chatState = { stage:'idle', collected:{} };
+    initChat();
+}
+
+function initChat() {
+    const name = currentUser ? currentUser.name.split(' ')[0] : 'there';
+    chatState.stage = 'greeting';
+    aiMsg(`👋 Hi <b>${name}</b>! I'm <b>MediBot</b>, your personal health assistant.<br><br>
+I'll ask you a few questions to understand your condition and then connect you with the right doctor.<br><br>
+<b>How are you feeling today?</b> You can describe your main symptom or just say "not well" to begin.`);
+}
+
+function sendMsg() {
+    const inp  = document.getElementById('chat-inp');
+    const text = inp.value.trim();
+    if (!text) return;
+    userMsg(text);
+    inp.value = '';
+    showTyping();
+    setTimeout(() => { removeTyping(); processChat(text); }, 1000 + Math.random()*600);
+}
+
+function userMsg(text) {
+    const box = document.getElementById('chat-box');
+    box.innerHTML += `<div class="msg-wrapper" style="text-align:right;"><div class="msg user-msg">${escHtml(text)}</div></div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+function aiMsg(html) {
+    const box = document.getElementById('chat-box');
+    box.innerHTML += `<div class="msg-wrapper"><div class="msg ai-msg">${html}</div></div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+function showTyping() {
+    const box = document.getElementById('chat-box');
+    box.innerHTML += `<div id="typing-ind" class="msg-wrapper"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+function removeTyping() {
+    document.getElementById('typing-ind')?.remove();
+}
+
+function escHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── CONVERSATION FLOW ── */
+function processChat(text) {
+    const t   = text.toLowerCase();
+    const col = chatState.collected;
+
+    // Greetings & small talk
+    if (chatState.stage === 'greeting') {
+        const greetWords = ['hi','hello','hey','good','fine','okay','ok','not well','bad','terrible','awful','sick'];
+        const isGreet    = greetWords.some(w => t.includes(w));
+        chatState.stage  = 'symptom';
+        if (isGreet && (t.includes('hi')||t.includes('hello')||t.includes('hey'))) {
+            aiMsg(`Hello! 😊 Great to see you here.<br><br>I'm here to help you with any health concerns. <b>What symptoms are you experiencing?</b> Please describe them in as much detail as you can.`);
+        } else {
+            aiMsg(`I'm sorry to hear that. 😔 Let's figure out what's going on.<br><br><b>Can you describe your main symptom?</b> For example: headache, chest pain, fever, rash, stomach ache, etc.`);
+        }
+        return;
+    }
+
+    if (chatState.stage === 'symptom') {
+        col.symptomText = text;
+        col.condition   = detectCondition(t);
+        chatState.stage = 'duration';
+        aiMsg(`I see, you're dealing with <b>${escHtml(text)}</b>. Got it.<br><br>⏱️ <b>How long have you been experiencing this?</b><br>(e.g. a few hours, 2 days, a week, a month…)`);
+        return;
+    }
+
+    if (chatState.stage === 'duration') {
+        col.duration    = text;
+        chatState.stage = 'severity';
+        aiMsg(`Noted — <b>${escHtml(text)}</b>.<br><br>📊 <b>How severe would you rate it?</b><br>• <b>Mild</b> — noticeable but manageable<br>• <b>Moderate</b> — affecting daily activities<br>• <b>Severe</b> — very painful / hard to function`);
+        return;
+    }
+
+    if (chatState.stage === 'severity') {
+        col.severity    = text;
+        chatState.stage = 'extra';
+        const severityMap = { mild:'LOW', moderate:'MODERATE', severe:'URGENT' };
+        const sKey = Object.keys(severityMap).find(k => t.includes(k)) || 'moderate';
+        col.urgency = severityMap[sKey];
+        aiMsg(`Understood. <b>${escHtml(text)}</b> severity.<br><br>🔍 <b>Any other symptoms?</b> (fever, nausea, dizziness, shortness of breath, etc.)<br>Or type <b>"no"</b> to proceed to analysis.`);
+        return;
+    }
+
+    if (chatState.stage === 'extra') {
+        col.extra       = t.includes('no') ? 'None mentioned' : text;
+        chatState.stage = 'done';
+
+        // Refine condition with extra symptoms
+        if (!t.includes('no')) {
+            const refined = detectCondition(col.symptomText.toLowerCase() + ' ' + t);
+            if (refined.category !== 'General') col.condition = refined;
+        }
+
+        // Escalate urgency for critical keywords
+        const criticalKw = ['chest pain','chest pressure','can\'t breathe','unconscious','paralysis','stroke','heart attack','severe bleeding'];
+        if (criticalKw.some(k => (col.symptomText+' '+col.extra).toLowerCase().includes(k))) col.urgency = 'CRITICAL';
+
+        showFullAnalysis();
+        return;
+    }
+
+    // If chat is done, allow follow-up questions
+    if (chatState.stage === 'done') {
+        handleFollowUp(t);
+        return;
+    }
+}
+
+function handleFollowUp(t) {
+    if (t.includes('book') || t.includes('appointment') || t.includes('consult')) {
+        aiMsg(`Sure! You can click any doctor card below to book directly, or head to the <b>Doctors</b> tab to browse all specialists. 📅`);
+    } else if (t.includes('hospital') || t.includes('emergency')) {
+        showHospitals();
+    } else if (t.includes('thank') || t.includes('thanks')) {
+        aiMsg(`You're welcome! 😊 Take care of yourself. Don't hesitate to come back if you need anything. 💙`);
+    } else if (t.includes('bye') || t.includes('ok done') || t.includes('okay done')) {
+        aiMsg(`Take care! 👋 Wishing you a speedy recovery. Remember to follow up with your doctor.`);
+    } else {
+        aiMsg(`I'm here if you have more questions! You can:<br>• Ask about <b>hospitals</b> nearby<br>• Ask to <b>book an appointment</b><br>• Start a <b>new analysis</b> (click Reset above)`);
+    }
+}
+
+/* ── CONDITION DETECTION ── */
+function detectCondition(t) {
+    const conds = [
+        { category:"Heart",   urgency:"URGENT",   pct:88, color:"#ef4444", label:"⚠ URGENT",
+          kw:['chest pain','chest pressure','chest tightness','palpitation','heart','shortness of breath','breathless','left arm'],
+          advice:"These symptoms may indicate a <b>cardiac condition</b>. Please seek urgent medical attention.", spec:"Cardiologist" },
+        { category:"Brain",   urgency:"URGENT",   pct:80, color:"#f59e0b", label:"⚠ URGENT",
+          kw:['severe headache','migraine','seizure','numbness','paralysis','slurred speech','stroke','memory loss','confusion'],
+          advice:"Neurological symptoms require <b>prompt evaluation</b>. Don't delay consultation.", spec:"Neurologist" },
+        { category:"Brain",   urgency:"MODERATE", pct:55, color:"#f59e0b", label:"MODERATE",
+          kw:['headache','dizziness','dizzy','vertigo','lightheaded'],
+          advice:"Persistent headaches or dizziness should be evaluated by a <b>neurologist</b>.", spec:"Neurologist" },
+        { category:"Stomach", urgency:"MODERATE", pct:50, color:"#3b82f6", label:"MODERATE",
+          kw:['stomach','abdomen','abdominal','nausea','vomiting','diarrhea','constipation','indigestion','acid reflux','bloating','gas','gastric'],
+          advice:"Gastrointestinal symptoms can have many causes. A <b>gastroenterologist</b> can help.", spec:"Gastroenterologist" },
+        { category:"Bone",    urgency:"MODERATE", pct:50, color:"#3b82f6", label:"MODERATE",
+          kw:['bone','joint','fracture','sprain','back pain','knee','arthritis','muscle pain','shoulder','neck pain'],
+          advice:"Musculoskeletal issues need proper assessment by an <b>orthopedic specialist</b>.", spec:"Orthopedic" },
+        { category:"Eye",     urgency:"MODERATE", pct:52, color:"#3b82f6", label:"MODERATE",
+          kw:['eye','vision','blurry','blurred','red eye','eye pain','cataract','sight'],
+          advice:"Eye symptoms require a thorough examination by an <b>ophthalmologist</b>.", spec:"Ophthalmologist" },
+        { category:"Dental",  urgency:"LOW",      pct:40, color:"#8b5cf6", label:"LOW",
+          kw:['tooth','teeth','dental','gum','cavity','toothache','wisdom tooth','jaw'],
+          advice:"Dental issues worsen without treatment. See a <b>dentist</b> soon.", spec:"Dentist" },
+        { category:"Skin",    urgency:"LOW",      pct:35, color:"#10b981", label:"LOW",
+          kw:['skin','rash','acne','itching','itch','allergy','pimple','eczema','psoriasis','hives','redness'],
+          advice:"Skin conditions are typically very treatable. A <b>dermatologist</b> can help.", spec:"Dermatologist" },
+        { category:"General", urgency:"LOW",      pct:30, color:"#10b981", label:"LOW",
+          kw:['fever','cough','cold','flu','sore throat','body ache','runny nose','fatigue','tired','weakness','sneeze'],
+          advice:"These appear to be common infection symptoms. Rest, hydrate, and see a <b>general physician</b> if they persist.", spec:"General Physician" },
+    ];
+
+    let best = null, bestScore = 0;
+    for (const c of conds) {
+        const score = c.kw.filter(k => t.includes(k)).length;
+        if (score > bestScore) { bestScore = score; best = c; }
+    }
+    return best || { category:"General", urgency:"LOW", pct:25, color:"#10b981", label:"LOW",
+        advice:"Based on your description, a <b>general physician</b> would be best to evaluate you.", spec:"General Physician" };
+}
+
+/* ── FULL ANALYSIS OUTPUT ── */
+function showFullAnalysis() {
+    const col  = chatState.collected;
+    const cond = col.condition;
+    const isCritical = col.urgency === 'CRITICAL';
+
+    // Summary message
+    aiMsg(`
+        <b>📋 Health Summary</b><br><br>
+        <b>Symptoms:</b> ${escHtml(col.symptomText)}<br>
+        <b>Duration:</b> ${escHtml(col.duration)}<br>
+        <b>Severity:</b> ${escHtml(col.severity)}<br>
+        <b>Additional:</b> ${escHtml(col.extra)}<br><br>
+        <b>Condition:</b> Possible <b>${cond.category}</b> issue<br>
+        <b>Priority:</b> <span style="color:${cond.color};font-weight:700;">${isCritical?'🚨 CRITICAL':cond.label}</span><br><br>
+        ${cond.advice}
+        ${isCritical ? '<br><br>🚨 <b>EMERGENCY: Please call 108 or go to the nearest hospital immediately!</b>' : ''}
+    `);
+
+    // Severity bar card
+    const box = document.getElementById('chat-box');
+    box.innerHTML += `
+        <div class="msg-wrapper">
+            <div class="analysis-card" style="max-width:90%;">
+                <div class="flex items-center justify-between mb-2">
+                    <b>🔬 Risk Assessment</b>
+                    <span style="color:${cond.color};font-size:0.85rem;font-weight:700;">${isCritical?'🚨 CRITICAL':cond.label}</span>
+                </div>
+                <div class="severity-bar">
+                    <div class="severity-fill" style="width:${isCritical?99:cond.pct}%;background:linear-gradient(90deg,${cond.color},${cond.color}aa);"></div>
+                </div>
+                <div class="text-xs text-slate-400">Risk Level: ${isCritical?99:cond.pct}%</div>
+                <div class="routing-info mt-3">
+                    <div class="text-xs font-semibold text-green-400 mb-1">🧭 Smart Routing Result</div>
+                    <div class="text-xs text-slate-300">Recommended: <b>${cond.spec}</b> · Priority: <b>${isCritical?'CRITICAL':col.urgency}</b></div>
+                </div>
+            </div>
+        </div>`;
+    box.scrollTop = box.scrollHeight;
+
+    // Show hospitals for critical, else show doctors
+    setTimeout(() => {
+        if (isCritical) { showHospitals(); }
+        else { showRecommendedDocs(cond.category); }
+    }, 600);
+}
+
+/* ── SHOW RECOMMENDED DOCTORS IN CHAT ── */
+function showRecommendedDocs(category) {
+    const filtered = DOCTORS.filter(d => d.cat === category);
+    const fallback = filtered.length ? filtered : DOCTORS.filter(d => d.cat === 'General');
+    const box      = document.getElementById('chat-box');
+
+    box.innerHTML += `
+        <div class="msg-wrapper">
+            <div class="msg ai-msg" style="max-width:100%;width:100%;">
+                <b>👨‍⚕️ Recommended Specialists Near You</b>
+                <div class="text-xs text-slate-400 mt-1 mb-2">Click a doctor to book instantly</div>
+                ${fallback.map(d => `
+                    <div class="rec-doc-card" onclick="openBooking(${d.id})">
+                        <div class="doc-avatar" style="width:44px;height:44px;font-size:0.9rem;flex-shrink:0;">${initials(d.name)}</div>
+                        <div style="flex:1;min-width:0;">
+                            <div class="mb-1">
+                                <button class="video-call-btn" style="padding:4px 10px; font-size:0.75rem; border-radius:8px;" onclick="openCallModal(event, ${d.id})">
+                                    <i class="fas fa-video"></i> Video Call
+                                </button>
+                            </div>
+                            <div class="font-semibold text-sm">${d.name}</div>
+                            <div class="text-xs text-slate-400">${d.spec} · ${d.hospital}</div>
+                            <div class="text-xs mt-1">
+                                <span class="text-yellow-400">⭐ ${d.rating}</span>
+                                <span class="text-slate-400 mx-1">·</span>
+                                <span class="text-green-400">${d.fee}</span>
+                                <span class="text-slate-400 mx-1">·</span>
+                                <span class="text-pink-400"><i class="fas fa-map-marker-alt"></i> ${d.dist}</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-500 flex-shrink-0"></i>
+                    </div>`).join('')}
+            </div>
+        </div>`;
+    box.scrollTop = box.scrollHeight;
+
+    setTimeout(() => {
+        aiMsg(`Would you like to know about <b>nearby hospitals</b> as well? Just type <b>"hospitals"</b> or ask me anything else! 😊`);
+    }, 400);
+}
+
+/* ── SHOW HOSPITALS IN CHAT ── */
+function showHospitals() {
+    const box = document.getElementById('chat-box');
+    box.innerHTML += `
+        <div class="msg-wrapper">
+            <div class="msg ai-msg" style="max-width:100%;width:100%;">
+                <b>🏥 Nearby Hospitals</b>
+                <div class="text-xs text-slate-400 mt-1 mb-3">Emergency & Advanced Care Facilities</div>
+                ${HOSPITALS.map(h => `
+                    <div class="rec-doc-card" style="cursor:default;">
+                        <div class="doc-avatar" style="width:44px;height:44px;font-size:1.2rem;flex-shrink:0;background:linear-gradient(135deg,#ef4444,#dc2626);">🏥</div>
+                        <div style="flex:1;min-width:0;">
+                            <div class="font-semibold text-sm">${h.name}</div>
+                            <div class="text-xs text-slate-400">${h.type}</div>
+                            <div class="text-xs mt-1 text-pink-400"><i class="fas fa-map-marker-alt mr-1"></i>${h.dist}</div>
+                        </div>
+                        <a href="tel:${h.phone}" class="text-blue-400 text-xs hover:text-blue-300 flex-shrink-0">
+                            <i class="fas fa-phone mr-1"></i>${h.phone}
+                        </a>
+                    </div>`).join('')}
+                <div class="text-xs text-red-400 mt-3 font-semibold">🚨 For medical emergencies call <b>108</b> immediately.</div>
+            </div>
+        </div>`;
+    box.scrollTop = box.scrollHeight;
+}
+</script>
+</body>
+</html>
